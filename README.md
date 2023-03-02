@@ -1,0 +1,1 @@
+This is basically just a project for me to play around with tkinter and making GUIs from pure code.
