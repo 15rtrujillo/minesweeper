@@ -52,36 +52,33 @@ class Board:
         self.button_frame = tk.Frame(self.root, width = self.window_x, height=self.window_y-25)
         self.button_frame.grid(row=1)
 
+        # This makes sure the frame's size doesn't change based on its children.
+        self.button_frame.grid_propagate(0)
+
         # Create the 2D buttons array
         self.buttons = list()
-        self.button_labels = list()
         for i in range(self.board_y):
             column = list()
-            button_labels_column = list()
             for j in range(self.board_x):
-                frame = tk.Frame(self.button_frame, width=25, height=25, highlightbackground="black", highlightthickness=1)
-                frame.bind("<Button-1>",lambda event, x = j, y = i: self.__cell_clicked(x, y))
-                #btn = tk.Button(frame, text=" ", command=lambda btn_x = j, btn_y = i: self.__cell_clicked(btn_x, btn_y))
-                frame.rowconfigure(0, weight = 1)
-                frame.columnconfigure(0, weight = 1)
-                frame.grid_propagate(0)
+                label = tk.Label(self.button_frame, text="", highlightbackground="black", highlightthickness=1)
 
-                frame.grid(row=i+1, column=j)
+                # Setting the "sticky" will have the labels fill to their relative cells
+                label.grid(row=i+1, column=j, sticky="NSEW")
 
-                label = tk.Label(frame, text=" ")
-                label.grid(row=0, column=0)
-                button_labels_column.append(label)
+                # Bind the left-click event
+                label.bind("<Button-1>",lambda event, x = j, y = i: self.__cell_clicked(x, y))
 
+                # configure rows and columns to expand when the frame is resized
+                self.button_frame.rowconfigure(i, weight=1)
+                self.button_frame.columnconfigure(i, weight=1)
 
-                #btn.grid(sticky = "NWSE")
-                column.append(frame)
+                column.append(label)
             self.buttons.append(column)
-            self.button_labels.append(button_labels_column)
 
 
     def __cell_clicked(self, x, y):
         cell_value = self.board[y][x]
-        label = self.button_labels[y][x]
+        label = self.buttons[y][x]
         label.configure(text=cell_value)
         
 
