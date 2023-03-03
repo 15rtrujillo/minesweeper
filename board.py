@@ -60,7 +60,7 @@ class Board:
         for i in range(self.board_y):
             column = list()
             for j in range(self.board_x):
-                label = tk.Label(self.button_frame, text="", highlightbackground="black", highlightthickness=1)
+                label = tk.Label(self.button_frame, text="     ", highlightbackground="black", highlightthickness=1)
 
                 # Setting the "sticky" will have the labels fill to their relative cells
                 label.grid(row=i+1, column=j, sticky="NSEW")
@@ -145,3 +145,9 @@ class Board:
             for column in row:
                 print(column, end=" ")
             print()
+
+
+if __name__ == "__main__":
+    board = Board(0)
+    board.create_window()
+    board.show_window()
