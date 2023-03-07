@@ -95,6 +95,14 @@ class Board:
         """Get a tile object based on the X and Y location
         x: The x location
         y: The y location"""
+        
+        # We have to do a boundary check so we don't crash
+        if x < 0 or x > self.board_x - 1:
+            return None
+        
+        if y < 0 or y > self.board_y - 1:
+            return None
+
         return self.board[y][x]
 
 

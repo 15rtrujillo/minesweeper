@@ -1,6 +1,7 @@
 from board import Board
 from tile import Tile
 import tkinter as tk
+import tkinter.messagebox as messagebox
 
 
 class GameWindow:
@@ -93,10 +94,7 @@ class GameWindow:
         self.reset_button.configure(text=" :) ")
 
         # Reset the labels
-        for y in range(self.board.board_y):
-            for x in range(self.board.board_x):
-                tile = self.board.get_tile(x, y)
-                self.__update_tile(x, y, tile)
+        self.__update_tiles()
 
 
     def __tile_left_clicked(self, x: int, y: int):
@@ -105,9 +103,12 @@ class GameWindow:
         y: The y location of the tile that was clicked"""
         tile = self.board.get_tile(x, y)
         tile.sweep()
+        self.__sweep_adjacent_tiles(x, y)
+        self.__update_tiles()
         if tile.value == "M":
             self.__die()
-        self.__update_tile(x, y, tile)
+        if self.__won():
+            messagebox.showinfo("Winner!", "You have won!")
 
 
     def __tile_right_clicked(self, x: int, y: int):
@@ -116,20 +117,51 @@ class GameWindow:
         y: The y location of the tile that was clicked"""
         tile = self.board.get_tile(x, y)
         mines_delta = tile.flag()
-        self.__update_tile(x, y, tile)
+        self.__update_tiles()
         self.__update_mine_count(mines_delta)
 
 
-    def __update_tile(self, x: int, y: int, tile: Tile):
-        """Relabel the tile on the screen depending on its status"""
-        label = self.buttons[y][x]
+    def __sweep_adjacent_tiles(self, x: int, y: int):
+        """Sweeps tiles  adjacent to the one passed in
+        THIS IS NOT CORRECT"""
+        # Check the upper tile
+        tile = self.board.get_tile(x, y-1)
+        if tile != None and (tile.unswept() and tile.value == 0):
+            tile.sweep()
+            self.__sweep_adjacent_tiles(x, y-1)
+        
+        # Check the right tile
+        tile = self.board.get_tile(x+1, y)
+        if tile != None and (tile.unswept() and tile.value == 0):
+            tile.sweep()
+            self.__sweep_adjacent_tiles(x+1, y)
 
-        if tile.flagged():
-            label.configure(text="F")
-        elif tile.swept():
-            label.configure(text=tile.value)
-        else:
-            label.configure(text="    ")
+        # Check the lower tile
+        tile = self.board.get_tile(x, y+1)
+        if tile != None and (tile.unswept() and tile.value == 0):
+            tile.sweep()
+            self.__sweep_adjacent_tiles(x, y+1)
+
+        # Check the left tile
+        tile = self.board.get_tile(x-1, y)
+        if tile != None and (tile.unswept() and tile.value == 0):
+            tile.sweep()
+            self.__sweep_adjacent_tiles(x-1, y)
+
+
+
+    def __update_tiles(self):
+        """Relabel the tiles depending on their status"""
+        for y in range(self.board.board_y):
+            for x in range(self.board.board_x):
+                tile = self.board.get_tile(x, y)
+                label = self.buttons[y][x]
+                if tile.flagged():
+                    label.configure(text="F")
+                elif tile.swept():
+                    label.configure(text=tile.value)
+                else:
+                    label.configure(text="    ")
 
 
     def __update_mine_count(self, mines_delta: int):
@@ -146,6 +178,24 @@ class GameWindow:
                 label = self.buttons[y][x]
                 if not (tile.flagged() and tile.value == "M"):
                     label.configure(text=tile.value)
+
+
+    def __won(self) -> bool:
+        """Returns true if the player has won or false otherwise"""
+        # Loop through every tile
+        for y in range(self.board.board_y):
+            for x in range(self.board.board_x):
+                tile = self.board.get_tile(x, y)
+                
+                # If the tile hasn't been swept and there isn't mine under it, we haven't won
+                if tile.unswept() and tile.value != "M":
+                    return False
+                
+                # If the tile has been flagged and there isn't a mine under it, we haven't won
+                if tile.flagged() and tile.value != "M":
+                    return False
+                
+        return True
         
 
 if __name__ == "__main__":

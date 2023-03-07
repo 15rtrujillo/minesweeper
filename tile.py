@@ -41,3 +41,8 @@ class Tile:
     def flagged(self) -> bool:
         """Returns true if the tile has been flagged, false otherwise"""
         return self.status == Tile.FLAGGED
+    
+
+    def unswept(self) -> bool:
+        """Returns true if the tile hasn't been swept or flagged, false otherwise"""
+        return self.status == Tile.UNSWEPT
