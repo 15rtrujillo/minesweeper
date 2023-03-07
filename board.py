@@ -91,6 +91,13 @@ class Board:
             print()
 
 
+    def get_tile(self, x: int, y: int) -> Tile:
+        """Get a tile object based on the X and Y location
+        x: The x location
+        y: The y location"""
+        return self.board[y][x]
+
+
 if __name__ == "__main__":
     board = Board(0)
     board.print_board()

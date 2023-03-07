@@ -12,6 +12,8 @@ class GameWindow:
         board_type: The type of board to create - 0. Beginner, 1. Intermediate, 2. Expert"""
         self.board = Board(board_type)
 
+        self.mine_count = self.board.mines
+
         self.window_x = self.board.board_x * 25
         self.window_y = self.board.board_y * 25 + 25
         self.root = None
@@ -20,7 +22,6 @@ class GameWindow:
         self.reset_button = None
         self.button_frame = None
         self.buttons = None
-        self.button_labels = None
 
         self.__create_window()
 
@@ -33,11 +34,11 @@ class GameWindow:
         self.info_frame = tk.Frame(self.root, width=self.window_x, height=25)
         self.info_frame.grid(row=0, column=0)
 
-        self.mines_label = tk.Label(self.info_frame, text=f"Mines: {self.board.mines}")
-        self.mines_label.grid(row=0, column=0, sticky="SW")
+        self.reset_button = tk.Button(self.info_frame, text=" :) ")
+        self.reset_button.grid(row=0, column=0)
 
-        self.reset_button = tk.Button(self.info_frame, text="Reset")
-        self.reset_button.grid(row=0, column=1)
+        self.mines_label = tk.Label(self.info_frame, text=f"Mines: {self.mine_count}")
+        self.mines_label.grid(row=0, column=1)
 
         self.__create_buttons()
 
@@ -85,14 +86,49 @@ class GameWindow:
         """Handle the left-click event on a tile
         x: The x location of the tile that was clicked
         y: The y location of the tile that was clicked"""
-        pass
+        tile = self.board.get_tile(x, y)
+        tile.sweep()
+        if tile.value == "M":
+            self.__die()
+        self.__update_tile(x, y, tile)
 
 
     def __tile_right_clicked(self, x: int, y: int):
         """Handle the right-click event on a tile
         x: The x location of the tile that was clicked
         y: The y location of the tile that was clicked"""
-        pass
+        tile = self.board.get_tile(x, y)
+        mines_delta = tile.flag()
+        self.__update_tile(x, y, tile)
+        self.__update_mine_count(mines_delta)
+
+
+    def __update_tile(self, x: int, y: int, tile: Tile):
+        """Relabel the tile on the screen depending on its status"""
+        label = self.buttons[y][x]
+
+        if tile.flagged():
+            label.configure(text="F")
+        elif tile.swept():
+            label.configure(text=tile.value)
+        else:
+            label.configure(text="    ")
+
+
+    def __update_mine_count(self, mines_delta: int):
+        self.mine_count += mines_delta
+        self.mines_label.configure(text=f"Mines: {self.mine_count}")
+
+
+    def __die(self):
+        self.reset_button.configure(text="x_x")
+        """The player has clicked a mine and died. We will reveal the board"""
+        for y in range(self.board.board_y):
+            for x in range(self.board.board_x):
+                tile = self.board.get_tile(x, y)
+                label = self.buttons[y][x]
+                if not (tile.flagged() and tile.value == "M"):
+                    label.configure(text=tile.value)
         
 
 if __name__ == "__main__":

@@ -9,8 +9,6 @@ def main():
 
     gameWindow = GameWindow(board_type)
     gameWindow.show_window()
-
-    board.print_board()
     
 
 if __name__ == "__main__":
