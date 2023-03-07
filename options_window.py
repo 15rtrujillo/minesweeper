@@ -1,9 +1,11 @@
 import tkinter as tk
 
-VERSION = 0.3
 
 class OptionsWindow:
+    """A window with game difficulty options"""
+
     def __init__(self):
+        """Create a new window to let the user select what difficulty they'd like to play at"""
         self.root = None
 
         self.window_x = 400
@@ -11,7 +13,7 @@ class OptionsWindow:
 
         self.info_frame = None
         self.info_label = None
-        self.info_text = f"Welcome to Minesweeper\nVersion {VERSION}\nWhat size of board would you like to play?"
+        self.info_text = f"Welcome to Minesweeper\nWhat size of board would you like to play?"
 
         self.radio_beginner = None
         self.radio_intermediate = None
@@ -23,8 +25,11 @@ class OptionsWindow:
         self.button_select = None
         self.button_quit = None
 
+        self.__create_window()
 
-    def create_window(self):
+
+    def __create_window(self):
+        """Create the window and fill it with controls"""
         self.root = tk.Tk()
         self.root.title("Minesweeper")
         
@@ -56,13 +61,21 @@ class OptionsWindow:
 
 
     def show_window(self):
+        """Display the window. Blocks until the user closes the window"""
         self.root.mainloop()
 
 
     def __button_select_clicked(self):
+        """Close the window so we can continue on with the program"""
         self.root.destroy()
 
 
     def __button_quit_clicked(self):
+        """Close the window and exit the program"""
         self.root.destroy()
         exit()
+
+
+if __name__ == "__main__":
+    optionsWindow = OptionsWindow()
+    optionsWindow.show_window()
