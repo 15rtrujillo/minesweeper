@@ -1,5 +1,4 @@
 from board import Board
-from random import randint
 from tile import Tile
 import tkinter as tk
 
@@ -12,6 +11,7 @@ class GameWindow:
         board_type: The type of board to create - 0. Beginner, 1. Intermediate, 2. Expert"""
         self.board = Board(board_type)
 
+        self.board_type = board_type
         self.mine_count = self.board.mines
 
         self.window_x = self.board.board_x * 25
@@ -34,7 +34,7 @@ class GameWindow:
         self.info_frame = tk.Frame(self.root, width=self.window_x, height=25)
         self.info_frame.grid(row=0, column=0)
 
-        self.reset_button = tk.Button(self.info_frame, text=" :) ")
+        self.reset_button = tk.Button(self.info_frame, text=" :) ", command=self.__reset_button_clicked)
         self.reset_button.grid(row=0, column=0)
 
         self.mines_label = tk.Label(self.info_frame, text=f"Mines: {self.mine_count}")
@@ -80,6 +80,23 @@ class GameWindow:
     def show_window(self):
         """Display the window. Blocks until the user closes the window"""
         self.root.mainloop()
+
+
+    def __reset_button_clicked(self):
+        """Handle the click event for the reset button"""
+        # Reset the board
+        self.board = Board(self.board_type)
+
+        # Reset info panel
+        mine_delta = self.board.mines - self.mine_count
+        self.__update_mine_count(mine_delta)
+        self.reset_button.configure(text=" :) ")
+
+        # Reset the labels
+        for y in range(self.board.board_y):
+            for x in range(self.board.board_x):
+                tile = self.board.get_tile(x, y)
+                self.__update_tile(x, y, tile)
 
 
     def __tile_left_clicked(self, x: int, y: int):
