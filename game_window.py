@@ -194,7 +194,7 @@ class GameWindow:
                 tile = self.board.get_tile(x, y)
                 label = self.buttons[y][x]
                 if tile.flagged():
-                    label.configure(text=" F ")
+                    label.configure(text="\u2691")
                 elif tile.swept():
                     if tile.value == 0:
                         label.configure(text=" _ ")
