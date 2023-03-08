@@ -24,6 +24,8 @@ class GameWindow:
         self.button_frame = None
         self.buttons = None
 
+        self.default_bg = None
+
         self.game_over = False
 
         self.__create_window()
@@ -44,6 +46,8 @@ class GameWindow:
         self.mines_label.grid(row=0, column=1)
 
         self.__create_buttons()
+
+        self.default_bg = self.mines_label.cget("bg")
 
         self.root.geometry(f"{self.window_x}x{self.window_y}")
 
@@ -89,7 +93,7 @@ class GameWindow:
         """Handle the click event for the reset button"""
         # Reset the board
         self.game_over = False
-        
+
         self.board = Board(self.board_type)
 
         # Reset info panel
@@ -108,6 +112,8 @@ class GameWindow:
         if self.game_over:
             return
         tile = self.board.get_tile(x, y)
+        if tile.flagged():
+            self.__update_mine_count(1)
         tile.sweep()
         if tile.value == 0:
             self.__sweep_adjacent_tiles(x, y)
@@ -226,15 +232,16 @@ class GameWindow:
 
 
     def __configure_color(self, label: tk.Label, tile: Tile):
-        colors = ["#000", "#00F", "#0F0", "#F00", "#F0F", "#800000", "#0FF", "#000", "#555"]
+        colors = ["#000", "#00F", "#0F0", "#F00", "#F0F", "#800000", "#0FF", "#000", "#777"] 
         if tile.flagged():
             label.configure(fg="#F00")
-        elif tile.value == "M":
-            label.configure(fg="#FFA500")
+        elif tile.swept():
+            if tile.value == "M":
+                label.configure(fg="#FFA500", bg="#F00")
+            else:
+                label.configure(fg=colors[tile.value], bg="#CCC")
         else:
-            label.configure(fg=colors[tile.value])
-            
-
+            label.configure(bg=self.default_bg)            
 
 
     def __won(self) -> bool:
