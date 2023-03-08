@@ -24,6 +24,8 @@ class GameWindow:
         self.button_frame = None
         self.buttons = None
 
+        self.game_over = False
+
         self.__create_window()
 
 
@@ -86,6 +88,8 @@ class GameWindow:
     def __reset_button_clicked(self):
         """Handle the click event for the reset button"""
         # Reset the board
+        self.game_over = False
+        
         self.board = Board(self.board_type)
 
         # Reset info panel
@@ -101,6 +105,8 @@ class GameWindow:
         """Handle the left-click event on a tile
         x: The x location of the tile that was clicked
         y: The y location of the tile that was clicked"""
+        if self.game_over:
+            return
         tile = self.board.get_tile(x, y)
         tile.sweep()
         if tile.value == 0:
@@ -117,6 +123,8 @@ class GameWindow:
         """Handle the right-click event on a tile
         x: The x location of the tile that was clicked
         y: The y location of the tile that was clicked"""
+        if self.game_over:
+            return
         tile = self.board.get_tile(x, y)
         mines_delta = tile.flag()
         self.__update_tiles()
@@ -207,6 +215,7 @@ class GameWindow:
 
     def __die(self):
         """The player has clicked a mine and died. We will reveal the board"""
+        self.game_over = True
         self.reset_button.configure(text="x_x")
         for y in range(self.board.board_y):
             for x in range(self.board.board_x):
@@ -243,6 +252,7 @@ class GameWindow:
                 if tile.flagged() and tile.value != "M":
                     return False
                 
+        self.game_over = True
         return True
         
 
