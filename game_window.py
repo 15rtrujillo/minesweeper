@@ -103,10 +103,12 @@ class GameWindow:
         y: The y location of the tile that was clicked"""
         tile = self.board.get_tile(x, y)
         tile.sweep()
-        self.__sweep_adjacent_tiles(x, y)
+        if tile.value == 0:
+            self.__sweep_adjacent_tiles(x, y)
         self.__update_tiles()
         if tile.value == "M":
             self.__die()
+            return
         if self.__won():
             messagebox.showinfo("Winner!", "You have won!")
 
@@ -122,32 +124,67 @@ class GameWindow:
 
 
     def __sweep_adjacent_tiles(self, x: int, y: int):
-        """Sweeps tiles  adjacent to the one passed in
-        THIS IS NOT CORRECT"""
+        """Sweeps tiles adjacent to the one passed in"""
+        # Check the upper-left tile
+        tile = self.board.get_tile(x-1, y-1)
+        if tile != None and tile.unswept() and tile.value != "M":
+            tile.sweep()
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x-1, y-1)
+
         # Check the upper tile
         tile = self.board.get_tile(x, y-1)
-        if tile != None and (tile.unswept() and tile.value == 0):
+        if tile != None and tile.unswept() and tile.value != "M":
             tile.sweep()
-            self.__sweep_adjacent_tiles(x, y-1)
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x, y-1)
+
+        # Check the upper-right tile
+        tile = self.board.get_tile(x+1, y-1)
+        if tile != None and tile.unswept() and tile.value != "M":
+            tile.sweep()
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x+1, y-1)
         
         # Check the right tile
         tile = self.board.get_tile(x+1, y)
-        if tile != None and (tile.unswept() and tile.value == 0):
+        if tile != None and tile.unswept() and tile.value != "M":
             tile.sweep()
-            self.__sweep_adjacent_tiles(x+1, y)
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x+1, y)
+                
+        # Check the lower-right tile
+        tile = self.board.get_tile(x+1, y+1)
+        if tile != None and tile.unswept() and tile.value != "M":
+            tile.sweep()
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x+1, y+1)
 
         # Check the lower tile
         tile = self.board.get_tile(x, y+1)
-        if tile != None and (tile.unswept() and tile.value == 0):
+        if tile != None and tile.unswept() and tile.value != "M":
             tile.sweep()
-            self.__sweep_adjacent_tiles(x, y+1)
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x, y+1)
+
+        # Check the lower-left tile
+        tile = self.board.get_tile(x-1, y+1)
+        if tile != None and tile.unswept() and tile.value != "M":
+            tile.sweep()
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x-1, y+1)
 
         # Check the left tile
         tile = self.board.get_tile(x-1, y)
-        if tile != None and (tile.unswept() and tile.value == 0):
+        if tile != None and tile.unswept() and tile.value != "M":
             tile.sweep()
-            self.__sweep_adjacent_tiles(x-1, y)
+            if tile.value == 0:
+                self.__sweep_adjacent_tiles(x-1, y)
 
+
+    def __update_mine_count(self, mines_delta: int):
+        self.mine_count += mines_delta
+        self.mines_label.configure(text=f"Mines: {self.mine_count}")
 
 
     def __update_tiles(self):
@@ -157,27 +194,38 @@ class GameWindow:
                 tile = self.board.get_tile(x, y)
                 label = self.buttons[y][x]
                 if tile.flagged():
-                    label.configure(text="F")
+                    label.configure(text=" F ")
                 elif tile.swept():
-                    label.configure(text=tile.value)
+                    if tile.value == 0:
+                        label.configure(text=" _ ")
+                    else:
+                        label.configure(text=tile.value)
                 else:
                     label.configure(text="    ")
-
-
-    def __update_mine_count(self, mines_delta: int):
-        self.mine_count += mines_delta
-        self.mines_label.configure(text=f"Mines: {self.mine_count}")
+                self.__configure_color(label, tile)
 
 
     def __die(self):
-        self.reset_button.configure(text="x_x")
         """The player has clicked a mine and died. We will reveal the board"""
+        self.reset_button.configure(text="x_x")
         for y in range(self.board.board_y):
             for x in range(self.board.board_x):
                 tile = self.board.get_tile(x, y)
-                label = self.buttons[y][x]
-                if not (tile.flagged() and tile.value == "M"):
-                    label.configure(text=tile.value)
+                if not tile.flagged():
+                    tile.sweep()
+                self.__update_tiles()
+
+
+    def __configure_color(self, label: tk.Label, tile: Tile):
+        colors = ["#000", "#00F", "#0F0", "#F00", "#F0F", "#800000", "#0FF", "#000", "#555"]
+        if tile.flagged():
+            label.configure(fg="#F00")
+        elif tile.value == "M":
+            label.configure(fg="#FFA500")
+        else:
+            label.configure(fg=colors[tile.value])
+            
+
 
 
     def __won(self) -> bool:
