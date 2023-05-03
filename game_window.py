@@ -37,7 +37,7 @@ class GameWindow:
         self.root.title("Minesweeper")
 
         self.info_frame = tk.Frame(self.root, width=self.window_x, height=25)
-        self.info_frame.grid(row=0, column=0)
+        self.info_frame.grid(row=0)
 
         self.reset_button = tk.Button(self.info_frame, text=" :) ", command=self.__reset_button_clicked)
         self.reset_button.grid(row=0, column=0)
@@ -47,6 +47,9 @@ class GameWindow:
 
         self.__create_buttons()
 
+        self.root.rowconfigure(1, weight=1)
+        self.root.columnconfigure(0, weight=1)
+
         self.default_bg = self.mines_label.cget("bg")
 
         self.root.geometry(f"{self.window_x}x{self.window_y}")
@@ -55,7 +58,7 @@ class GameWindow:
     def __create_buttons(self):
         """Create the buttons that will be used to interact with the tiles of the Minesweeper board"""
         self.button_frame = tk.Frame(self.root, width = self.window_x, height=self.window_y-25)
-        self.button_frame.grid(row=1)
+        self.button_frame.grid(row=1, sticky="NSEW")
 
         # This makes sure the frame's size doesn't change based on its children.
         self.button_frame.grid_propagate(0)
@@ -76,11 +79,13 @@ class GameWindow:
                 # Bind the right-click event
                 label.bind("<Button-3>", lambda event, x = j, y = i: self.__tile_right_clicked(x, y))
 
-                # configure rows and columns to expand when the frame is resized
-                self.button_frame.rowconfigure(i, weight=1)
-                self.button_frame.columnconfigure(i, weight=1)
+                # configure columns to expand when the frame is resized
+                self.button_frame.columnconfigure(j, weight=1)
 
                 column.append(label)
+
+            # configure rows to expand when the frame is resized
+            self.button_frame.rowconfigure(i, weight=1)
             self.buttons.append(column)
 
 
@@ -218,6 +223,9 @@ class GameWindow:
                     label.configure(text="    ")
                 self.__configure_color(label, tile)
 
+            # Update every row so the program doesn't appear frozen on big boards
+            self.root.update()
+
 
     def __die(self):
         """The player has clicked a mine and died. We will reveal the board"""
@@ -228,7 +236,7 @@ class GameWindow:
                 tile = self.board.get_tile(x, y)
                 if not tile.flagged():
                     tile.sweep()
-                self.__update_tiles()
+        self.__update_tiles()
 
 
     def __configure_color(self, label: tk.Label, tile: Tile):
